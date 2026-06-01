@@ -8,7 +8,7 @@ fake_items_db = [{"item_name": "Foo"}, {"item_name": "Zoo"}]
 async def root(): 
     return {"message": "This is day 5 of our AI learning journey. Today I will be learning query parameters."}
 
-@app.get("/items/")
+@app.get("/items/") # See this trailing slash here, it's best to not use it. /items/ and /items are two different routes. But fastapi redirects you to /items (if created) when you type /items/
 async def read_item(skip: int = 0, limit: int = 10): # This is query paramters which go like .../items/?skip=0&limit=10
     return fake_items_db[skip: skip + limit] # This is list slicing by the way. Don't forget like how I just did.
 # Again, the way the process works is first the user enters the url which is a string. Then because we've declared the query parameters as int type, the url section responsible for the values of skip and limit would be 
