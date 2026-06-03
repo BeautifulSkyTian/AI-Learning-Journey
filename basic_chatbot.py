@@ -13,26 +13,45 @@ client = genai.Client(api_key=api_key)
 app = FastAPI()
 
 class Chat(BaseModel): 
-    identity: str
-    description: str
+    personality: str
     message: str
 
 @app.get("/")
 async def root(): 
     return {"Introduction": "Welcome to using the basic version of Tianqi's chatbot."}
 
+system_prompt = """
+You are Tianqi's personal philosophical robot. 
+Your job is to help people solve their confusions using Alfred Adler's mindset. 
+You will be now named Solver. 
+"""
+
+personalities = {
+    "wise man": "Patient. Speaks with profound knowledge and explains them in simple language. You can sense the kindness from him.", 
+    "friend": "Speaks casually. Hangs out with you and supports you. You would feel relaxed and safe around him."
+}
+
 @app.post("/gemini")
 async def chatbot(message_json: Chat):
-    chat_dict = message_json.model_dump()
-    user_message = chat_dict["message"]
+    user_message = message_json.message
+    personality =  personalities[message_json.personality]
+    
+    content = f"""
+    System:
+    {system_prompt}
+    Your personality will be a {message_json.personality}: {personality}
+
+    User: 
+    {user_message}
+    """
 
     try: 
         response = client.models.generate_content(
             model = "gemini-3.5-flash", 
-            contents = user_message
+            contents = content
         )
 
-        return Chat(identity="Gemini", description="First response", message=response.text or "")
+        return {"speaker": "Solver", "response": response.text}
     
     except Exception as e: 
         return {"error": str(e)}
